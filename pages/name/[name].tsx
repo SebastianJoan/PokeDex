@@ -35,9 +35,9 @@ const PokemonByName: NextPage<Props> = ( {pokemon} ) => {
 
 
     return (
-        <Layout title={`Pokemon #${pokemon.id} : ${pokemon.name}`}>
-            <div className='w-full h-screen px-4 py-2 bg-gray-900 flex flex-col md:flex-row justify-center items-start justify-items-center gap-3'>
-                <div className='w-[30%] h-[50%] border-2 border-white rounded-sm hover:rounded-md cursor-pointer flex justify-center items-center justify-items-center p-4'>
+        <Layout title={`Pokemon #${pokemon.id} : ${pokemon.name}`} id={pokemon.id}>
+            <div className='w-full min-h-screen h-auto px-4 py-2 bg-gray-900 flex flex-col md:flex-row justify-center items-start justify-items-center gap-3'>
+                <div className='w-full md:w-[30%] h-[300px] border-2 border-white rounded-sm hover:rounded-md cursor-pointer flex justify-center items-center justify-items-center p-4'>
                     <Image
                         src={ pokemon.sprites.other?.dream_world.front_default || '/no-image.png' }
                         alt={`Podemon #${pokemon.id}: ${pokemon.name} image`}
@@ -47,12 +47,12 @@ const PokemonByName: NextPage<Props> = ( {pokemon} ) => {
                         priority={true}
                     />
                 </div>
-                <div className='w-[70%] h-[50%] border-2 border-white rounded-sm hover:rounded-md  cursor-pointer text-white flex flex-col justify-center items-start justify-items-center px-4 py-4'>
-                    <div className='w-full h-auto flex justify-between items-center justify-items-center'>
+                <div className='w-full md:w-[70%] h-auto md:h-[300px] border-2 border-white rounded-sm hover:rounded-md  cursor-pointer text-white flex flex-col justify-center items-start justify-items-center px-4 py-4'>
+                    <div className='w-full h-auto flex flex-col md:flex-row justify-between items-center justify-items-center gap-3'>
                         <h3 className=' font-bold text-3xl'> { pokemon.id } : { pokemon.name } </h3>
                         <button onClick={onToggleFavorite} className={`w-auto px-4 py-2 ${isInFavorites ? 'text-white bg-green-500 hover:bg-red-500' : 'text-black bg-white hover:bg-green-500 hover:text-white' } rounded-2 rounded-white text-black font-bold rounded-md`}> { isInFavorites ? 'En Favoritos' : 'Agregar a Favoritos' }  </button>
                     </div>
-                    <div className='w-full h-full flex justify-center items-center justify-items-center'>
+                    <div className='w-full h-full flex flex-col md:flex-row justify-center items-center justify-items-center'>
                         <Image
                             src={ pokemon.sprites.front_default }
                             alt={`Podemon #${pokemon.id}: ${pokemon.name} image`}
@@ -101,18 +101,29 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
         paths: pokemonNames.map( name => ({
             params: { name }
         })),
-        fallback: false
+        fallback: 'blocking'
     }
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
     
     const { name } = params as { name:string };
+    const pokemon = await getPokemonInfo(name);
+
+    if(!pokemon){
+        return{
+            redirect:{
+                destination:'/',
+                permanent:false
+            }
+        }
+    }
 
     return {
         props:{
-            pokemon: await getPokemonInfo(name)
-        }
+            pokemon:pokemon 
+        },
+        revalidate:86400,
     }
 }
 
