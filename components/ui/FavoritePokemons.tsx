@@ -1,3 +1,5 @@
+import { pokeApi } from '@/api';
+import { Pokemon } from '@/interfaces';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { FC } from 'react'
@@ -10,8 +12,9 @@ export const FavoritePokemons: FC<Props> = ({ pokemons }) => {
 
     const router = useRouter();
 
-    const onFavoriteClicked = (id:number) => {
-        router.push(`/pokemon/${id}`)
+    const onFavoriteClicked = async (id:number) => {
+        const { data } = await pokeApi.get<Pokemon>(`/pokemon/${id}`)
+        router.push(`/name/${data.name}`)
     }
 
     return (
